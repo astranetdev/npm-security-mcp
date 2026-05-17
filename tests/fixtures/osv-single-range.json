@@ -1,0 +1,24 @@
+{
+  "id": "GHSA-sing-rang-test",
+  "summary": "ReDoS in single-pkg",
+  "details": "Regular expression denial of service.",
+  "severity": [{ "type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H/7.5" }],
+  "aliases": ["CVE-2022-11111"],
+  "references": [],
+  "published": "2022-01-10T00:00:00Z",
+  "modified": "2022-01-12T00:00:00Z",
+  "affected": [
+    {
+      "package": { "name": "single-pkg", "ecosystem": "npm" },
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            { "introduced": "0" },
+            { "fixed": "4.17.21" }
+          ]
+        }
+      ]
+    }
+  ]
+}

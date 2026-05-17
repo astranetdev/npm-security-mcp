@@ -121,7 +121,7 @@ export async function scanDependencies({ package_json, include_dev = false }) {
   return lines.join('\n');
 }
 
-function resolveRangeVersion(range) {
+export function resolveRangeVersion(range) {
   if (!range || range === 'latest' || range === '*') return null;
   if (/^(workspace:|file:|git\+|git:|github:|bitbucket:|gitlab:)/.test(range)) return null;
   if (semver.valid(range)) return range;

@@ -1,0 +1,41 @@
+{
+  "name": "fixture-pkg",
+  "description": "A fixture package for testing",
+  "dist-tags": { "latest": "2.0.0" },
+  "versions": {
+    "1.0.0": {
+      "name": "fixture-pkg",
+      "version": "1.0.0",
+      "scripts": { "postinstall": "node malicious.js" },
+      "license": "MIT",
+      "maintainers": [{ "name": "alice", "email": "alice@example.com" }],
+      "dist": {
+        "shasum": "aaa111",
+        "integrity": "sha512-aaa111==",
+        "tarball": "https://registry.npmjs.org/fixture-pkg/-/fixture-pkg-1.0.0.tgz"
+      }
+    },
+    "2.0.0": {
+      "name": "fixture-pkg",
+      "version": "2.0.0",
+      "scripts": {},
+      "license": "MIT",
+      "maintainers": [
+        { "name": "alice", "email": "alice@example.com" },
+        { "name": "bob", "email": "bob@example.com" }
+      ],
+      "dist": {
+        "shasum": "bbb222",
+        "integrity": "sha512-bbb222==",
+        "tarball": "https://registry.npmjs.org/fixture-pkg/-/fixture-pkg-2.0.0.tgz"
+      }
+    }
+  },
+  "maintainers": [
+    { "name": "alice", "email": "alice@example.com" },
+    { "name": "bob", "email": "bob@example.com" }
+  ],
+  "homepage": "https://example.com/fixture-pkg",
+  "license": "MIT",
+  "repository": { "type": "git", "url": "https://github.com/example/fixture-pkg.git" }
+}

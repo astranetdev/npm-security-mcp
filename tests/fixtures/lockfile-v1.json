@@ -1,0 +1,19 @@
+{
+  "name": "legacy-project",
+  "version": "1.0.0",
+  "lockfileVersion": 1,
+  "dependencies": {
+    "express": {
+      "version": "4.18.0",
+      "resolved": "https://registry.npmjs.org/express/-/express-4.18.0.tgz",
+      "dependencies": {
+        "ms": {
+          "version": "2.0.0"
+        }
+      }
+    },
+    "lodash": {
+      "version": "4.17.21"
+    }
+  }
+}

@@ -92,7 +92,7 @@ export async function generateSbom({ package_json, format = 'cyclonedx' }) {
   return `## SBOM Generated (${format.toUpperCase()})\n\n\`\`\`json\n${JSON.stringify(sbom, null, 2)}\n\`\`\``;
 }
 
-function resolveExactVersion(rangeSpec) {
+export function resolveExactVersion(rangeSpec) {
   if (!rangeSpec || rangeSpec === 'latest' || rangeSpec === '*') return null;
   if (/^(workspace:|file:|git\+|git:|github:|bitbucket:|gitlab:)/.test(rangeSpec)) return null;
   if (semver.valid(rangeSpec)) return rangeSpec;

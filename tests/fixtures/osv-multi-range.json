@@ -1,0 +1,26 @@
+{
+  "id": "GHSA-mult-rang-test",
+  "summary": "Prototype pollution in test-pkg",
+  "details": "Prototype pollution allows attackers to modify Object prototype.",
+  "severity": [{ "type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H/9.8" }],
+  "aliases": ["CVE-2021-99999", "GHSA-mult-rang-test"],
+  "references": [{ "url": "https://example.com/advisory/1" }],
+  "published": "2021-06-01T00:00:00Z",
+  "modified": "2021-06-15T00:00:00Z",
+  "affected": [
+    {
+      "package": { "name": "test-pkg", "ecosystem": "npm" },
+      "ranges": [
+        {
+          "type": "SEMVER",
+          "events": [
+            { "introduced": "1.0.0" },
+            { "fixed": "1.5.0" },
+            { "introduced": "2.0.0" },
+            { "fixed": "2.3.0" }
+          ]
+        }
+      ]
+    }
+  ]
+}

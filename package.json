@@ -16,6 +16,7 @@
   "homepage": "https://github.com/astranetdev/npm-security-mcp#readme",
   "scripts": {
     "start": "node src/index.js",
+    "test": "node --test tests/unit/*.test.js",
     "smoke": "node src/smoke-tests.js"
   },
   "dependencies": {

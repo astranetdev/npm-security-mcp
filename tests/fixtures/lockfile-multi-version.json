@@ -1,0 +1,33 @@
+{
+  "name": "test-project",
+  "version": "1.0.0",
+  "lockfileVersion": 2,
+  "requires": true,
+  "packages": {
+    "": {
+      "name": "test-project",
+      "version": "1.0.0",
+      "dependencies": {
+        "vuln-pkg": "^4.0.0",
+        "safe-pkg": "^1.0.0"
+      }
+    },
+    "node_modules/vuln-pkg": {
+      "version": "4.17.21",
+      "resolved": "https://registry.npmjs.org/vuln-pkg/-/vuln-pkg-4.17.21.tgz",
+      "integrity": "sha512-xxx"
+    },
+    "node_modules/safe-pkg": {
+      "version": "1.5.0"
+    },
+    "node_modules/safe-pkg/node_modules/vuln-pkg": {
+      "version": "3.10.1",
+      "resolved": "https://registry.npmjs.org/vuln-pkg/-/vuln-pkg-3.10.1.tgz",
+      "integrity": "sha512-yyy"
+    },
+    "node_modules/symlink-pkg": {
+      "version": "1.0.0",
+      "link": true
+    }
+  }
+}

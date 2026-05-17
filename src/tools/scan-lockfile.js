@@ -13,7 +13,7 @@ export const scanLockfileSchema = z.object({
 const osv = new OsvAdapter();
 const npmAdvisory = new NpmBulkAdvisoryAdapter();
 
-function parseLockfile(content) {
+export function parseLockfile(content) {
   let lock;
   try {
     lock = JSON.parse(content);
@@ -33,13 +33,18 @@ function parseLockfile(content) {
     for (const [path, meta] of Object.entries(lock.packages)) {
       if (!path || path === '') continue; // root
       if (meta.link) continue; // symlinks
-      const name = meta.name || path.replace(/^node_modules\//, '').replace(/\/node_modules\//g, '/');
+      // Strip leading "node_modules/" then split on "/node_modules/" to get last segment.
+      // Handles nested installs: node_modules/foo/node_modules/bar → bar (not foo/bar).
+      const name = meta.name || path.replace(/^node_modules\//, '').split('/node_modules/').pop();
       const version = meta.version;
       if (!name || !version) continue;
+      // Only top-level installs (node_modules/<name>) can be direct deps.
+      // Nested installs (node_modules/foo/node_modules/bar) are always transitive.
+      const isTopLevel = !path.slice('node_modules/'.length).includes('/node_modules/');
       packages.push({
         name,
         version,
-        isDirect: directDeps.has(name),
+        isDirect: isTopLevel && directDeps.has(name),
         path,
       });
     }
