@@ -75,8 +75,14 @@ export async function scanLockfile({ content }) {
     npmAdvisory.fetch(packages).then(r => { consulted.push('npm-advisory'); if (!r.ok) failed.push('npm-advisory'); return r; }),
   ]);
 
-  // Map advisories to packages
-  const pkgMap = new Map(packages.map(p => [p.name, p]));
+  // Group packages by name — lockfiles can have multiple versions of the same package
+  const pkgsByName = new Map();
+  for (const p of packages) {
+    if (!pkgsByName.has(p.name)) pkgsByName.set(p.name, []);
+    pkgsByName.get(p.name).push(p);
+  }
+
+  // vulnMap keyed by "name@version" so each installed instance is checked independently
   const vulnMap = new Map();
 
   const allAdvisories = dedupAdvisories([
@@ -85,13 +91,14 @@ export async function scanLockfile({ content }) {
   ]);
 
   for (const adv of allAdvisories) {
-    const pkg = pkgMap.get(adv.packageName);
-    if (!pkg) continue;
-    const installed = pkg.version;
-    if (adv.vulnerableVersions && !isVulnerable(installed, adv.vulnerableVersions)) continue;
-
-    if (!vulnMap.has(adv.packageName)) vulnMap.set(adv.packageName, []);
-    vulnMap.get(adv.packageName).push(adv);
+    const instances = pkgsByName.get(adv.packageName);
+    if (!instances) continue;
+    for (const pkg of instances) {
+      if (adv.vulnerableVersions && !isVulnerable(pkg.version, adv.vulnerableVersions)) continue;
+      const key = `${pkg.name}@${pkg.version}`;
+      if (!vulnMap.has(key)) vulnMap.set(key, { pkg, advs: [] });
+      vulnMap.get(key).advs.push(adv);
+    }
   }
 
   // Count by severity
@@ -104,7 +111,7 @@ export async function scanLockfile({ content }) {
     return 'unknown';
   };
 
-  for (const advs of vulnMap.values()) {
+  for (const { advs } of vulnMap.values()) {
     const sev = worstSeverity(advs);
     if (sev in counts) counts[sev]++;
   }
@@ -121,12 +128,11 @@ export async function scanLockfile({ content }) {
   } else {
     lines.push(`\n\n### Vulnerable Packages (${vulnMap.size})\n`);
     const rows = [];
-    for (const [pkgName, advs] of [...vulnMap.entries()].sort()) {
-      const pkg = pkgMap.get(pkgName);
+    for (const [, { pkg, advs }] of [...vulnMap.entries()].sort()) {
       const sev = worstSeverity(advs);
       const fix = advs.map(a => a.fixVersion || extractFixVersion(a.patchedVersions)).filter(Boolean)[0] || '—';
       rows.push([
-        `\`${pkgName}\``,
+        `\`${pkg.name}\``,
         pkg.version,
         advs.length.toString(),
         `${severityEmoji(sev)} ${sev}`,
@@ -140,7 +146,7 @@ export async function scanLockfile({ content }) {
     ));
 
     lines.push(`\n### Advisory Details\n`);
-    for (const [, advs] of vulnMap.entries()) {
+    for (const [, { advs }] of vulnMap.entries()) {
       for (const adv of advs) {
         lines.push(`**${adv.id}** (${adv.packageName}): ${adv.title} — ${severityEmoji(adv.severity)} ${adv.severity}`);
         if (adv.patchedVersions) lines.push(`  Fix: \`${adv.patchedVersions}\``);

@@ -131,21 +131,33 @@ export class OsvAdapter extends BaseAdapter {
   }
 
   _extractVersionRanges(vuln, pkgName) {
+    const vulnerableRanges = [];
+    const patchedVersions = [];
+
     for (const affected of vuln.affected || []) {
       if (affected.package?.name !== pkgName && pkgName) continue;
-      const ranges = affected.ranges || [];
-      const events = ranges.flatMap(r => r.events || []);
-      let introduced = null, fixed = null;
-      for (const e of events) {
-        if (e.introduced && e.introduced !== '0') introduced = e.introduced;
-        if (e.fixed) fixed = e.fixed;
+      for (const range of affected.ranges || []) {
+        if (range.type !== 'SEMVER' && range.type !== 'ECOSYSTEM') continue;
+        let introduced = null;
+        for (const e of range.events || []) {
+          if ('introduced' in e) {
+            introduced = e.introduced === '0' ? null : e.introduced;
+          } else if ('fixed' in e) {
+            vulnerableRanges.push(introduced != null ? `>=${introduced} <${e.fixed}` : `<${e.fixed}`);
+            patchedVersions.push(`>=${e.fixed}`);
+            introduced = null;
+          } else if ('last_affected' in e) {
+            vulnerableRanges.push(introduced != null ? `>=${introduced} <=${e.last_affected}` : `<=${e.last_affected}`);
+            introduced = null;
+          }
+        }
+        if (introduced != null) vulnerableRanges.push(`>=${introduced}`);
       }
-      const vulnerable = introduced
-        ? fixed ? `>=${introduced} <${fixed}` : `>=${introduced}`
-        : fixed ? `<${fixed}` : null;
-      const patched = fixed ? `>=${fixed}` : null;
-      return { vulnerable, patched };
     }
-    return { vulnerable: null, patched: null };
+
+    return {
+      vulnerable: vulnerableRanges.length ? vulnerableRanges.join(' || ') : null,
+      patched: patchedVersions.length ? patchedVersions[patchedVersions.length - 1] : null,
+    };
   }
 }

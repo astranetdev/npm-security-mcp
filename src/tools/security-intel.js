@@ -125,17 +125,8 @@ export async function securityIntelSummary({ days = 7 }) {
   return lines.join('\n');
 }
 
-async function fetchOsvRecent(since) {
-  // OSV doesn't have a direct "recent npm advisories" endpoint, but we can
-  // use the modified field filter via list endpoint
-  const res = await fetch('https://api.osv.dev/v1/query', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      package: { ecosystem: 'npm' },
-      // OSV querybatch doesn't filter by date; use paginated list approach
-    }),
-  });
-  // OSV doesn't support "all recent for ecosystem" easily — return empty and rely on GitHub
+async function fetchOsvRecent(_since) {
+  // OSV has no paginated "recent by ecosystem" endpoint without iterating all vulns.
+  // Rely on GitHub Advisory for recent intel instead.
   return [];
 }

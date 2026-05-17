@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import semver from 'semver';
 import { NpmRegistryAdapter } from '../adapters/npm-registry.js';
 import { randomUUID } from 'node:crypto';
 
@@ -31,29 +32,51 @@ export async function generateSbom({ package_json, format = 'cyclonedx' }) {
   const components = await Promise.all(
     depNames.map(async (name) => {
       const rangeSpec = deps[name];
+      const exactVersion = resolveExactVersion(rangeSpec);
       try {
-        const meta = await registry.getPackage(name);
-        const version = meta['dist-tags']?.latest;
-        const vMeta = version ? meta.versions?.[version] : null;
+        let version, description, license, dist, homepage, repository, maintainers;
+        if (exactVersion) {
+          // Fetch specific version manifest — contains actual installed metadata
+          const vMeta = await registry.getPackage(name, exactVersion);
+          version = exactVersion;
+          description = vMeta.description || '';
+          license = vMeta.license || 'NOASSERTION';
+          dist = vMeta.dist || {};
+          homepage = vMeta.homepage || '';
+          repository = vMeta.repository?.url || '';
+          maintainers = vMeta.maintainers || [];
+        } else {
+          // Range or alias — fetch full doc and use latest as fallback
+          const meta = await registry.getPackage(name);
+          version = meta['dist-tags']?.latest;
+          const vMeta = version ? meta.versions?.[version] : null;
+          description = meta.description || '';
+          license = vMeta?.license || meta.license || 'NOASSERTION';
+          dist = vMeta?.dist || {};
+          homepage = meta.homepage || '';
+          repository = meta.repository?.url || '';
+          maintainers = meta.maintainers || [];
+        }
         return {
           name,
-          version,
-          description: meta.description || '',
-          license: vMeta?.license || meta.license || 'NOASSERTION',
-          purl: `pkg:npm/${encodeURIComponent(name)}@${version}`,
-          dist: vMeta?.dist || {},
-          homepage: meta.homepage || '',
-          repository: meta.repository?.url || '',
-          maintainers: meta.maintainers || [],
+          version: version || rangeSpec,
+          description,
+          license,
+          purl: `pkg:npm/${encodeURIComponent(name)}@${version || ''}`,
+          dist,
+          homepage,
+          repository,
+          maintainers,
         };
       } catch {
         return {
           name,
-          version: rangeSpec.replace(/^[\^~>=<*]/, ''),
+          version: exactVersion || rangeSpec,
           description: '',
           license: 'NOASSERTION',
           purl: `pkg:npm/${encodeURIComponent(name)}`,
           dist: {},
+          maintainers: [],
         };
       }
     })
@@ -67,6 +90,16 @@ export async function generateSbom({ package_json, format = 'cyclonedx' }) {
   }
 
   return `## SBOM Generated (${format.toUpperCase()})\n\n\`\`\`json\n${JSON.stringify(sbom, null, 2)}\n\`\`\``;
+}
+
+function resolveExactVersion(rangeSpec) {
+  if (!rangeSpec || rangeSpec === 'latest' || rangeSpec === '*') return null;
+  if (/^(workspace:|file:|git\+|git:|github:|bitbucket:|gitlab:)/.test(rangeSpec)) return null;
+  if (semver.valid(rangeSpec)) return rangeSpec;
+  try {
+    const min = semver.minVersion(rangeSpec);
+    return min ? min.version : null;
+  } catch { return null; }
 }
 
 function buildCycloneDX(pkg, components) {

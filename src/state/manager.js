@@ -1,4 +1,4 @@
-import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { homedir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -19,9 +19,6 @@ const DEFAULT_STATE = {
   scanHistory: [],
   cache: {},
 };
-
-let _writing = false;
-let _writeQueue = [];
 
 export class StateManager {
   constructor() {
@@ -47,7 +44,9 @@ export class StateManager {
   async save() {
     const dir = this._path.replace(/\/[^/]+$/, '');
     await mkdir(dir, { recursive: true });
-    await writeFile(this._path, JSON.stringify(this._state, null, 2), 'utf8');
+    const tmp = this._path + '.tmp';
+    await writeFile(tmp, JSON.stringify(this._state, null, 2), 'utf8');
+    await rename(tmp, this._path);
   }
 
   async getCache(key, isMetadata = false) {

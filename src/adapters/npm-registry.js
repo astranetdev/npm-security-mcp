@@ -1,4 +1,5 @@
 import { BaseAdapter, AdapterResult } from './base.js';
+import { stateManager } from '../state/manager.js';
 
 const REGISTRY = 'https://registry.npmjs.org';
 const TIMEOUT_PKG = 10000;
@@ -25,6 +26,10 @@ export class NpmRegistryAdapter extends BaseAdapter {
   }
 
   async getPackage(name, version) {
+    const cacheKey = `meta:${name}${version ? `@${version}` : ''}`;
+    const cached = await stateManager.getCache(cacheKey, true).catch(() => null);
+    if (cached) return cached;
+
     const url = version
       ? `${REGISTRY}/${encodeURIComponent(name)}/${encodeURIComponent(version)}`
       : `${REGISTRY}/${encodeURIComponent(name)}`;
@@ -34,7 +39,9 @@ export class NpmRegistryAdapter extends BaseAdapter {
     }, TIMEOUT_PKG);
 
     if (!res.ok) throw new Error(`npm registry HTTP ${res.status} for ${name}`);
-    return await res.json();
+    const data = await res.json();
+    await stateManager.setCache(cacheKey, data).catch(() => {});
+    return data;
   }
 
   async getLatestVersion(name) {
@@ -70,8 +77,9 @@ export class NpmRegistryAdapter extends BaseAdapter {
   }
 
   extractRiskSignals(pkgData, version) {
-    const versionData = version ? pkgData : null;
-    const scripts = versionData?.scripts || pkgData?.versions?.[Object.keys(pkgData.versions || {}).pop()]?.scripts || {};
+    const latest = pkgData['dist-tags']?.latest;
+    const vMeta = pkgData.versions?.[version || latest] || {};
+    const scripts = vMeta.scripts || {};
     const signals = [];
 
     const riskyScripts = ['preinstall', 'install', 'postinstall', 'prepack', 'prepare'];

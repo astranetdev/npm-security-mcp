@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import semver from 'semver';
 import { OsvAdapter } from '../adapters/osv.js';
 import { SocketMcpAdapter } from '../adapters/socket-mcp.js';
 import { SocketApiAdapter } from '../adapters/socket-api.js';
@@ -32,12 +33,10 @@ export async function scanDependencies({ package_json, include_dev = false }) {
     return '## Dependency Scan\n\nNo dependencies found in package.json.';
   }
 
-  const packages = Object.entries(deps).map(([name, range]) => ({
-    name,
-    version: range.replace(/^[\^~>=<]/, '').split(' ')[0],
-    range,
-    isRange: /[\^~><=*x]/.test(range),
-  }));
+  const packages = Object.entries(deps).map(([name, range]) => {
+    const version = resolveRangeVersion(range);
+    return { name, version, range, isRange: !semver.valid(range) };
+  });
 
   const consulted = [];
   const failed = [];
@@ -120,6 +119,16 @@ export async function scanDependencies({ package_json, include_dev = false }) {
 
   lines.push(formatSources(consulted, failed));
   return lines.join('\n');
+}
+
+function resolveRangeVersion(range) {
+  if (!range || range === 'latest' || range === '*') return null;
+  if (/^(workspace:|file:|git\+|git:|github:|bitbucket:|gitlab:)/.test(range)) return null;
+  if (semver.valid(range)) return range;
+  try {
+    const min = semver.minVersion(range);
+    return min ? min.version : null;
+  } catch { return null; }
 }
 
 function worstSeverity(advs) {
