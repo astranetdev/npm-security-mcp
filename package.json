@@ -1,0 +1,19 @@
+{
+  "name": "npm-security-mcp",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "MCP server for npm security scanning and advisory lookup",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "smoke": "node src/smoke-tests.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "semver": "^7.6.0",
+    "zod": "^3.23.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

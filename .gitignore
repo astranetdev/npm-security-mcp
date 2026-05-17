@@ -1,0 +1,5 @@
+node_modules/
+~/.npm-security-mcp/
+.env
+.env.*
+*.local
