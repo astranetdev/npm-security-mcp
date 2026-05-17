@@ -233,3 +233,11 @@ Each adapter implements `available()` and `fetch(packages)`. If `available()` re
 
 Retry: 3 attempts with exponential backoff (500ms, 1000ms, 2000ms).  
 Timeouts: 10s for npm/OSV, 15s for Socket.
+
+## License
+
+Copyright (c) 2026 AstranetDev
+
+Licensed under the [Apache License, Version 2.0](LICENSE).
+
+You may use, copy, modify, distribute, and sublicense this software freely under the terms of the Apache 2.0 License. See [LICENSE](LICENSE) for the full text.

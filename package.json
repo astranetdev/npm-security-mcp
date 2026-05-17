@@ -4,6 +4,16 @@
   "type": "module",
   "description": "MCP server for npm security scanning and advisory lookup",
   "main": "src/index.js",
+  "license": "Apache-2.0",
+  "author": "AstranetDev",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/AstranetDev/npm-security-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AstranetDev/npm-security-mcp/issues"
+  },
+  "homepage": "https://github.com/AstranetDev/npm-security-mcp#readme",
   "scripts": {
     "start": "node src/index.js",
     "smoke": "node src/smoke-tests.js"
