@@ -47,7 +47,7 @@ If an adapter fails, others continue. Each response reports which sources were c
 ## Installation
 
 ```bash
-git clone git@github.com:AstranetDev/npm-security-mcp.git
+git clone git@github.com:astranetdev/npm-security-mcp.git
 cd npm-security-mcp
 npm install
 ```
@@ -115,7 +115,7 @@ jobs:
       - name: Install npm-security-mcp
         run: |
           cd /tmp
-          git clone https://github.com/AstranetDev/npm-security-mcp.git
+          git clone https://github.com/astranetdev/npm-security-mcp.git
           cd npm-security-mcp && npm install
 
       - name: Scan lockfile for vulnerabilities

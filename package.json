@@ -8,12 +8,12 @@
   "author": "AstranetDev",
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/AstranetDev/npm-security-mcp.git"
+    "url": "git+ssh://git@github.com/astranetdev/npm-security-mcp.git"
   },
   "bugs": {
-    "url": "https://github.com/AstranetDev/npm-security-mcp/issues"
+    "url": "https://github.com/astranetdev/npm-security-mcp/issues"
   },
-  "homepage": "https://github.com/AstranetDev/npm-security-mcp#readme",
+  "homepage": "https://github.com/astranetdev/npm-security-mcp#readme",
   "scripts": {
     "start": "node src/index.js",
     "smoke": "node src/smoke-tests.js"
